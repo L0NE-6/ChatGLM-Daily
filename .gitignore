@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+chatglm_state.json
+chatglm_state.json.tmp
+*.log

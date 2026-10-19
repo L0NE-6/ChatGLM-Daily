@@ -1,0 +1,46 @@
+name: ChatGLM Daily
+
+on:
+  # 公开仓库默认不跑定时，避免空跑。
+  # fork 后启用定时：取消下面两行注释；cron 使用 UTC。
+  # schedule:
+  #   - cron: "10 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ChatGLM-Daily
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run ChatGLM Daily
+        env:
+          CHATGLM_ACCOUNTS: ${{ secrets.CHATGLM_ACCOUNTS }}
+          CHATGLM_TOKEN: ${{ secrets.CHATGLM_TOKEN }}
+          CHATGLM_REFRESH_TOKEN: ${{ secrets.CHATGLM_REFRESH_TOKEN }}
+          CHATGLM_DEVICE_ID: ${{ secrets.CHATGLM_DEVICE_ID }}
+          CHATGLM_PROXY: ${{ secrets.CHATGLM_PROXY }}
+          PLUSPLUS_TOKEN: ${{ secrets.PLUSPLUS_TOKEN }}
+          BARK_URL: ${{ secrets.BARK_URL }}
+          WECOM_WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
+          DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
+        run: python chatglm_daily.py

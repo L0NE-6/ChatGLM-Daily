@@ -65,6 +65,7 @@ USER_AGENT = (
 
 PATH_REFRESH = "/chatglm/user-api/user/refresh"
 PATH_MEMBER_INFO = "/chatglm/member-api/member/member_info"
+PATH_SCORE_ACTIVITY_OPEN = "/chatglm/member-api/member/score_activity_open"
 PATH_SCORE_ACTIVITY_DRAW = "/chatglm/member-api/member/score_activity_draw"
 PATH_DAILY_LOGIN_SCORE = "/chatglm/member-api/member/daily_login_score"
 PATH_SUMMER_DAY_CLAIM_STATUS = "/chatglm/member-api/member/summer_day_claim_status"
@@ -321,6 +322,47 @@ def envelope(payload, what):
     raise ChatGLMError("%s失败（status=%s）：%s" % (what, status, message))
 
 
+def parse_activity_open(payload):
+    try:
+        result = envelope(payload, "积分活动状态查询")
+    except ChatGLMError:
+        return None
+    if isinstance(result, bool):
+        return result
+    if isinstance(result, dict):
+        for key in ("open", "is_open"):
+            value = result.get(key)
+            if isinstance(value, bool):
+                return value
+    return None
+
+
+def daily_login_result(payload, activity_open=None):
+    status = payload.get("status")
+    if str(status) == "10001":
+        return True, "今日登录积分已领取"
+    result = envelope(payload, "每日登录积分领取")
+    if isinstance(result, dict):
+        raw = result.get("score")
+    elif isinstance(result, (int, float)) and not isinstance(result, bool):
+        raw = result
+    else:
+        raw = None
+    if raw is None:
+        return False, "每日登录积分响应缺少积分读数，未确认签到完成"
+    try:
+        score = round(float(raw) / 100.0, 2)
+    except Exception:
+        return False, "每日登录积分响应积分读数无法解析，未确认签到完成"
+    if score > 0:
+        return True, "每日登录积分 +%s" % score
+    if activity_open is False:
+        return True, "积分活动未开启，无登录积分可领"
+    if activity_open is True:
+        return True, "今日登录积分已领取"
+    return False, "本次没有登录积分入账，活动状态尚未确认"
+
+
 class ChatGLMClient:
     def __init__(self, account, state, proxy=None):
         self.name = account.get("name") or "账号"
@@ -449,7 +491,15 @@ class ChatGLMClient:
             balance = None
         return balance, member
 
+    def query_activity_open(self):
+        try:
+            payload = self.get(PATH_SCORE_ACTIVITY_OPEN, "积分活动状态查询")
+        except Exception:
+            return None
+        return parse_activity_open(payload)
+
     def claim_login(self):
+        activity_open = self.query_activity_open()
         try:
             payload = self.post(PATH_DAILY_LOGIN_SCORE, {}, "每日登录积分领取")
         except Exception as exc:
@@ -457,23 +507,7 @@ class ChatGLMClient:
             if any(word in message for word in ("10001", "已领", "already")):
                 return True, "今日登录积分已领取"
             raise
-        status = payload.get("status")
-        if str(status) == "10001":
-            return True, "今日登录积分已领取"
-        result = envelope(payload, "每日登录积分领取") or {}
-        if isinstance(result, dict):
-            raw = result.get("score", 0)
-        elif isinstance(result, (int, float)):
-            raw = result
-        else:
-            raw = 0
-        try:
-            score = round(float(raw) / 100.0, 2)
-        except Exception:
-            score = 0.0
-        if score > 0:
-            return True, "每日登录积分 +%s" % score
-        return True, "今日登录积分已领取或活动未开启"
+        return daily_login_result(payload, activity_open)
 
     def claim_bonus(self):
         messages = []

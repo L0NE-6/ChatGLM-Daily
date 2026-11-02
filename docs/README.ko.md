@@ -123,6 +123,10 @@ pip3 install requests cryptography
 - `chatglm_state.json`, `.env`, 장치 ID, 로그인 상태를 Git에 커밋하지 마세요.
 - Issue를 작성하기 전에 토큰과 계정 식별자를 제거하세요.
 
+## 사용 범위 및 재배포 안내
+
+공식 저장소, 스크립트, 배포 설명 및 Release 다운로드는 무료입니다. 유료 패키징, 유료 배포 대행, 회원 전용화, 재판매, 저작자 표시 삭제, 저작자 사칭, 저작자의 신원이나 QR 코드를 보증처럼 사용하는 행위, 무관한 계정·그룹·채널로 옮겨 트래픽을 유도하는 행위는 허용되지 않습니다. 위반 콘텐츠는 삭제 요청될 수 있으며, 저작자는 업데이트를 중단하거나 저장소를 보관 또는 삭제할 수 있습니다. 전체 규칙은 [../NOTICE.md](../NOTICE.md)를 참고하세요.
+
 ## 🔗 링크
 
 - [Releases](https://github.com/L0NE-6/ChatGLM-Daily/releases)

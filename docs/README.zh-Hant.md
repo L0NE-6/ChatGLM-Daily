@@ -123,6 +123,10 @@ pip3 install requests cryptography
 - 不要把 `chatglm_state.json`、`.env`、設備號或登入態提交到 Git。
 - 回報問題前請移除權杖與帳號標識。
 
+## 使用邊界與轉載聲明
+
+官方版本免費。禁止付費包裝、付費部署、會員門檻、轉售、刪除署名、冒充作者、以作者身分或二維碼作背書，或搬運到無關帳號、群組與頻道引流。違規內容可能被要求下架；作者可暫停更新、封存或刪除倉庫。完整規則見 [../NOTICE.md](../NOTICE.md)。
+
 ## 🔗 專案連結
 
 - [Releases](https://github.com/L0NE-6/ChatGLM-Daily/releases)
